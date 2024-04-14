@@ -22,6 +22,10 @@ def estimate_continuation_value(
 
     ## We only consider the invest / delay investment decision for price paths that are in the money (ie. positive NPV):
     in_the_money_length = len(in_the_money)
+   
+   #### IDK WTF HIS IS:
+    assert state_variables_ncol == len(state_variables.columns), "INADIQUATE DIMENIONS WHICH IS WERID"
+
 
     ## Early return:
     if in_the_money_length == 0:
@@ -41,19 +45,13 @@ def estimate_continuation_value(
 
     #Only regress paths In the money (in_the_money):
     if cross_product:
-        number_columns = 1 + state_variables_ncol * degree + factorial(state_variables.ncol - 1)
-        regression_matrix = np.ndarray(in_the_money_length, 1 + state_variables_ncol * degree + cross_product)
+        number_columns = 1 + (state_variables_ncol * degree) + factorial(state_variables.ncol - 1)
+        regression_matrix = np.ndarray(number_columns)
     else:
-        regression_matrix = np.ndarray(in_the_money_length, (1 + state_variables_ncol * degree + ifelse(cross_product, factorial(state_variables.ncol - 1),0)))
+        number_columns = 1 + (state_variables_ncol * degree)
 
-
-    
-
-    regression_matrix <- np.ndarray((in_the_money_length, (1 + state_variables_ncol * degree + ifelse(cross_product, factorial(state_variables.ncol - 1),0)))
     index <- state_variables.ncol+1
     regression.matrix[,1:index] <- c(continuation_value[in_the_money], state_variables_t_in_the_money)
     index <- index + 1
-
-
 
     pass

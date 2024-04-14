@@ -2,9 +2,10 @@ from math import exp, sqrt
 from statistics import mean, variance
 import pandas as pd
 import numpy as np
-number_simulations = 100
-number_periods = 10
 
+from utils.option_results import option_results
+
+## Helper:
 discount = lambda r, t=1: exp(-r*t)
 
 def LSM_american_option(state_variables, 
@@ -20,8 +21,6 @@ def LSM_american_option(state_variables,
                         **kwargs,
                         ):
 
-    ## Helper:
-    discount = lambda r, t=1: exp(-r*t)
 
     ## Number simulations = Number columns:
     number_simulations = len(state_variables.columns)
@@ -106,7 +105,7 @@ def LSM_american_option(state_variables,
     ### End backwards induction.
 
     ## Calculate project value -  discount payoffs
-    option_values = [0 for x in number_simulations]
+    option_values = np.repeat(0, number_simulations)
 
 
     ## American option value - discounting payoffs back to time zero, averaging over all paths.
@@ -119,26 +118,7 @@ def LSM_american_option(state_variables,
     ## Calculate option value:
     option_price = mean(option_values)
 
-    ## Typical return:
-    verbose = kwargs.get('verbose', None)
-    if verbose:
-        return option_price
-    ## Verbose / debug - log it all:
-    elif verbose is True:
-        ## Verbose Outputs:
-        exercise_time = (exercise_period - 1) * dt
+    ## Execise time:
+    exercise_time = (exercise_period - 1) * dt
 
-        return {
-            ## Option value
-            "Value" : option_price,
-            ## Option value standard error
-            "Standard Error" : sqrt(variance(option_values) / number_simulations),
-            ## expected exercise time
-            "Expected Timing" : mean(exercise_time),
-            ## exercise time standard error
-            "Expected Timing SE" : sqrt(variance(exercise_time) / number_simulations),
-            ## exercise prob.
-            "Exercise Probability" : len(in_the_money_paths) / number_simulations,
-            ## cumulative exercise prob.
-            "Cumulative Exercise Probability" : cumsum(table(c(exercise_time, (0:(number_periods - 1)) * dt)) - 1) / number_simulations
-        }
+    return option_results(option_price, option_values, number_simulations, exercise_time, in_the_money_paths, dt)
