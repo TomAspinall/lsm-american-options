@@ -1,16 +1,6 @@
 from numbers import Number
 import numpy as np
-from math import sqrt, log, exp
-
-
-## 100 simulations of 1 year of monthly price paths:
-n = 100
-t = 1
-reversion_rate = 1
-sigma = 0.2
-equilibrium = 100
-S0 = 100
-dt = 1/12
+from math import sqrt, log, ceil
 
 def simulate_IGBM(
         n: int, 
@@ -21,10 +11,12 @@ def simulate_IGBM(
         S0: Number, 
         dt: Number
         ) -> np.ndarray:
+    """
+    simulate random paths of the inomogeneous geometric Brownian motion stochastic differential process through Monte Carlo simulation.
+    """
 
     ## Dimension 1:
     number_steps = t / dt
-    from math import ceil
     number_steps_total = ceil(number_steps)
 
     ## Dimension 2:
@@ -41,28 +33,25 @@ def simulate_IGBM(
     output = np.ndarray((number_steps_total, number_simulations))
 
     ## Initial values;
-    output[0,:] = log(S0)
+    output[0] = log(S0)
 
     adjusted_risk = 0.5 * (sigma ** 2)
     simulated_value_columns = np.arange(0,number_simulations,2)
     antithetic_value_columns = simulated_value_columns + 1
-    for t in range(number_steps_total):
-        output_exp_t = np.exp(output[t])
+    for t in range(number_steps_total - 1):
+
         ## Log-distribution:
+        output_exp_t = np.exp(output[t])
         
         ## Mean-reverting drift:
         drift = (reversion_rate * ((equilibrium - output_exp_t) / output_exp_t) - adjusted_risk) * dt
 
         ## Simulated Values:
-        output[t, simulated_value_columns] += drift[simulated_value_columns] + shock[t,:]
+        output[t + 1, simulated_value_columns] = output[t, simulated_value_columns] + drift[simulated_value_columns] + shock[t]
         
         ## Antithetic Values:
-        output[t, antithetic_value_columns] += drift[antithetic_value_columns] + shock[t,:]
+        output[t + 1, antithetic_value_columns] = output[t, antithetic_value_columns] + drift[antithetic_value_columns] - shock[t]
 
     ## Return output:
-    return np.exp(output)
-
-# simulate_IGBM(n, t, reversion_rate, equilibrium, sigma, S0, dt)
-
-
+    return np.exp(output[:,:n])
 
