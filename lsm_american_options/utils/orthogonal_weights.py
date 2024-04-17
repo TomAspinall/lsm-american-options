@@ -1,8 +1,8 @@
 from orthogonal_polynomials import (
-    orthogonal_weight_chebyshev, 
+    orthogonal_weight_chebyshev,
     orthogonal_weight_hermite,
-    orthogonal_weight_jacobi, 
-    orthogonal_weight_laguerre, 
+    orthogonal_weight_jacobi,
+    orthogonal_weight_laguerre,
     orthogonal_weight_legendre,
 )
 from math import floor, factorial
@@ -11,21 +11,24 @@ from math import floor, factorial
 ########################## Orthogonal Algorithms: ############################
 ##############################################################################
 
-orthogonal_options = ["POWER", "LAGUERRE", "LEGENDRE", "CHEBYSHEV", "HERMITE", "JACOBI"]
+orthogonal_options = ["POWER", "LAGUERRE",
+                      "LEGENDRE", "CHEBYSHEV", "HERMITE", "JACOBI"]
+
 
 def orthogonal_weight(
-        n: int, 
-        x, 
-        orthogonal: str = "Laguerre", 
-        alpha: float = 0.0, 
-        beta: float = 0.0) -> list: 
+        n: int,
+        x,
+        orthogonal: str = "Laguerre",
+        alpha: float = 0.0,
+        beta: float = 0.0) -> list:
 
-    assert orthogonal.upper() in orthogonal_options, f"arg 'orthogonal' expected one of: {orthogonal_options}"
+    assert orthogonal.upper() in orthogonal_options, f"arg 'orthogonal' expected one of: {
+        orthogonal_options}"
 
-    ## Case insensitive:
+    # Case insensitive:
     orthogonal = orthogonal.upper()
 
-    ## n or n / 2 ?
+    # n or n / 2 ?
     if orthogonal in ["LEGENDRE", "CHEBYSHEV", "HERMITE"]:
         N = n / 2
     else:
@@ -35,11 +38,11 @@ def orthogonal_weight(
         Warning(f"Orthogonal weighting (n) rounded down from {n} to {n-1}")
     N = floor(N)
 
-    ## Early return - Power function:
+    # Early return - Power function:
     if orthogonal == "POWER":
         return x ** N
-    
-    ## Iterative Orthogonal Weights:
+
+    # Iterative Orthogonal Weights:
 
     if orthogonal == "LAGUERRE":
         return sum((orthogonal_weight_laguerre(N, m, x) for m in range(N+1)))
