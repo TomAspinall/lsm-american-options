@@ -3,7 +3,7 @@ import numpy as np
 from math import sqrt, log, ceil
 
 
-def simulate_IGBM(
+def inhomogeneous_geometric_brownian_motion(
         n: int,
         t: Number,
         reversion_rate: Number,
@@ -18,7 +18,10 @@ def simulate_IGBM(
 
     # Dimension 1:
     number_steps = t / dt
-    number_steps_total = ceil(number_steps)
+    number_simulated_steps = ceil(number_steps)
+    # Include initial value:
+    number_steps_total = number_simulated_steps + 1
+
 
     # Dimension 2:
     if n % 2 == 0:
@@ -34,17 +37,16 @@ def simulate_IGBM(
     antithetic_value_columns = simulated_value_columns + 1
 
     # shock:
-    shock = (np.random.normal(scale=sigma * sqrt(dt), size=number_loops *
-             number_steps_total)).reshape((number_steps_total, number_loops))
+    shock = (np.random.normal(scale=sigma * sqrt(dt), size=number_loops * number_simulated_steps)).reshape((number_simulated_steps, number_loops))
 
     # Output array:
-    output = np.ndarray((number_steps_total, number_simulations))
+    output = np.zeros((number_steps_total, number_simulations))
 
     # Initial values;
     output[0] = log(S0)
 
     # Begin Monte Carlo simulation:
-    for t in range(number_steps_total - 1):
+    for t in range(number_simulated_steps):
 
         # Log-distribution:
         output_exp_t = np.exp(output[t])

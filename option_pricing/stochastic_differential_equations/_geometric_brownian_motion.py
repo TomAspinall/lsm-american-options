@@ -10,7 +10,7 @@ S0 = 100
 dt = 1/12
 
 
-def simulate_GBM(
+def geometric_brownian_motion(
         n: int,
         t: Number,
         mu: Number,
@@ -62,11 +62,11 @@ def simulate_GBM(
 
 
 # Why do the antithetic values go haywire after a certain point?
-hi = GBM_simulate(
-    n=100000,
-    t=40,
-    mu=0.05,
-    sigma=0.2,
-    S0=100,
-    dt=1/12
-)
+# hi = GBM_simulate(
+#     n=100000,
+#     t=40,
+#     mu=0.05,
+#     sigma=0.2,
+#     S0=100,
+#     dt=1/12
+# )
