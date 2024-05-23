@@ -1,3 +1,4 @@
+
 from math import exp, sqrt, ceil
 import numpy as np
 
@@ -7,25 +8,24 @@ from .._utils._discount import discount
 def discount(interest_rate, time_period=1): 
     return exp(-interest_rate*time_period)
 
-
 # Functions for probabilities & tree prices:
 
-# r = 0.05
-# delta_t = 1
-# stock_price = 18.01
-# strike_price = 20
-# n = 40
-# call_option = True
-# mu = 0.06
-# sigma = 0.2
-# S0 = 38
-## GBM Parameters:
-# alpha = 0.0408
-# risk_premium = 0.01
-# sigma = 0.4683
+r = 0.05
+strike_price = 20
 
-## TODO: Payoff for American option call / put
-## 2024-04-30: Needs more information
+delta_t = 1
+stock_price = 18.01
+n = 40
+call_option = False
+mu = 0.06
+sigma = 0.2
+S0 = 38
+# GBM Parameters:
+# alpha = 0.0408
+alpha = 0
+risk_premium = 0
+sigma = 0.4683
+
 
 def binomial_option_pricing_model(
     r,
@@ -37,12 +37,9 @@ def binomial_option_pricing_model(
     call_option = True
 ):
 
-    #Drift value:
-    drift = alpha - 0.5 * sigma - risk_premium
-
-
-    ## Discount rate between discrete steps:
+    ## Discount / premium rate between discrete steps:
     discount_rate = discount(r, delta_t)
+    premium_rate = discount(-r, delta_t)
 
     ## Number of Discrete time steps:
     number_periods = n / delta_t
@@ -54,10 +51,11 @@ def binomial_option_pricing_model(
 
     ## Risk Neutral Probabilites:
     prob_up   = exp(sigma * sqrt(delta_t))
-    prob_down =  1 / prob_up
+    prob_down =  exp(-sigma * sqrt(delta_t))
     
     ## Discount likelihood according to probabilities:
-    probability = (exp((r)*delta_t)-prob_down)/(prob_up-prob_down)
+    probability = (premium_rate-prob_down)/(prob_up-prob_down) if prob_up-prob_down != 0 else 1
+    q_probability = 1 - probability
 
     ## Sparse / Diagonal tree of probabilities:
     potential_stock_prices = np.zeros(out_shape)
@@ -66,33 +64,32 @@ def binomial_option_pricing_model(
     for index, time in zip(range(total_periods), range(1,total_periods+1)):
         cols = np.arange(start=1, stop=time+1)
 
+        ## Probabilities:
         down = prob_down ** (time - cols)
         up = prob_up ** (cols - 1)
-        
-        potential_stock_prices[index, :time] = np.maximum(stock_price * up * down, 0)
+
+        potential_stock_prices[index, :time] = up * down
+    ## Stock Price Tree:
+    potential_stock_prices *= stock_price
+
+    # terminal_stock_prices = stock_price * prob_down ** (total_periods - cols) * prob_up ** (cols - 1)
+
+
+    ## Safety:
+    # potential_stock_prices = np.maximum(potential_stock_prices, 0)
 
     ## Payoff / Decision tree:
     option_tree = np.zeros(out_shape)
-    optimal_decisions = np.zeros(out_shape)
 
     ## Payoff calculation:
     if call_option:
-        payoff = lambda stock_price, option_payoff: max(stock_price - strike_price, option_payoff)
+        option_tree[-1, :] = np.maximum(potential_stock_prices[-1, :] - strike_price, 0)
     else:
-        payoff = lambda stock_price, option_payoff: max(strike_price - stock_price, option_payoff)
+        option_tree[-1, :] = np.maximum(strike_price - potential_stock_prices[-1, :], 0)
 
-    ## Begin backwards induction:
-    for index, time in zip(range(total_periods - 1, -1, -1), range(total_periods, 0, -1)):
-        break
-        
-        ## Discounted payoff of immediate exercise:
-        potential_stock_prices[index, :time] * discount(r, delta_t * index)
+    ## Recursive payoff calculation:
+    for i in range(len(option_tree) - 1, 0, -1):
+        option_tree[i-1, :i] = discount_rate * (probability * (option_tree[i, :i]) + (q_probability * option_tree[i, 1:(i+1)]))
 
-
-
-        ## Exercise Payoff:
-        exercise_payoff = payoff()
-        print(index)
-        break
-
-    # option_tree[-1,:] = 0
+    ## Final calculation:
+    return discount_rate * (probability * (option_tree[1, 0]) + (q_probability * option_tree[1, 1]))
