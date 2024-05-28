@@ -6,6 +6,16 @@ from .._utils._continuation_value import estimate_continuation_value
 from .._utils._discount import discount
 
 
+from option_pricing._utils._continuation_value import estimate_continuation_value
+from option_pricing._utils._discount import discount
+
+state_variables = np.array()
+
+from option_pricing.stochastic_differential_equations._geometric_brownian_motion import geometric_brownian_motion as GBM
+stock_prices = GBM(n = 10000, t=1, mu=0.06, sigma=0.2, S0=36, dt=1/50)
+stock_prices.max()
+
+
 def least_squares_monte_carlo(state_variables: np.ndarray,
                         payoff: np.ndarray,
                         K: Number | np.ndarray,

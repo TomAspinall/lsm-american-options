@@ -1,13 +1,13 @@
 from numbers import Number
 import numpy as np
-from math import sqrt, log
+from math import sqrt, log, ceil
 
-n = 100
-t = 1
-mu = 0.05
-sigma = 0.2
-S0 = 100
-dt = 1/12
+# n = 100
+# t = 40
+# mu = 0.05
+# sigma = 0.001
+# S0 = 100
+# dt = 1/12
 
 
 def geometric_brownian_motion(
@@ -20,9 +20,10 @@ def geometric_brownian_motion(
 ) -> np.ndarray:
 
     # Dimension 1:
-    number_steps = t / dt
-    from math import ceil
-    number_steps_total = ceil(number_steps)
+    number_steps = ceil(t / dt)
+    rounded_up = divmod(t, dt)[1] > 1e-5
+    if rounded_up:
+        number_steps += 1
 
     # Dimension 2:
     if n % 2 == 0:
@@ -33,40 +34,40 @@ def geometric_brownian_motion(
 
     # Drift:
     drift = (mu - 0.5 * (sigma**2)) * dt
-    # Drift per time point:
-    # drift_t = np.cumsum(np.repeat(drift, number_loops))
-    drift_t = np.repeat(drift, number_loops)
-    # Applied to each simulation:
+    # Cumulative Drift per time point:
+    drift_t = np.cumsum(np.repeat(drift, number_steps))
     # Shock:
     shock = np.random.normal(scale=sigma * sqrt(dt), size=number_loops *
-                             number_steps_total).reshape((number_steps_total, number_loops))
+                             number_steps).reshape((number_steps, number_loops))
+    shock_cumulative = np.cumsum(shock, axis=1)
 
-    # Simulated values:
-    values = np.cumsum(drift_t) + np.cumsum(shock, axis=1)
-    # Antithetic values:
-    antithetic_values = np.cumsum(drift_t) - np.cumsum(shock, axis=1)
+    ## Total output steps includes today:
+    number_steps_output = number_steps + 1
 
-    output = np.ndarray((number_steps_total + 1, number_simulations))
-    # Initial value:
+    ## Output array:
+    output = np.zeros((number_steps_output, number_loops))
+    antithetic_output = np.zeros((number_steps_output, number_loops))
+
+    ## Initial value:
     output[0, :] = log(S0)
+    antithetic_output[0, :] = log(S0)
+
     # Simulated values:
-    output[1:, :] = log(
-        S0) + np.concatenate([values, antithetic_values], axis=1)
+    for i in range(number_loops):
+        output[1:,i] = log(S0) + drift_t + shock_cumulative[:,i]
+        antithetic_output[1:,i] = log(S0) + drift_t - shock_cumulative[:,i]
 
-    # values = log(S0) + np.cumsum(drift_t + shock, axis = 1)
-    # np.cumsum(drift_t + shock, axis = 1).round(2)
-    # antithetic_values = log(S0) + np.cumsum(drift_t - shock, axis = 1)
-    # output = np.concatenate([values, antithetic_values], axis=1)
+    ## Output:
+    return np.exp(np.concatenate([output, antithetic_output], axis=1))
 
-    return np.exp(output)
-
-
-# Why do the antithetic values go haywire after a certain point?
-# hi = GBM_simulate(
-#     n=100000,
-#     t=40,
-#     mu=0.05,
-#     sigma=0.2,
-#     S0=100,
-#     dt=1/12
+# hi = geometric_brownian_motion(
+#         n,
+#         t,
+#         mu,
+#         sigma,
+#         S0,
+#         dt
 # )
+
+# hi.shape
+# hi.max()
