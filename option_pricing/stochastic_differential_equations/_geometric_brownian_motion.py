@@ -2,13 +2,7 @@ from numbers import Number
 import numpy as np
 from math import sqrt, log, ceil
 
-# n = 100
-# t = 40
-# mu = 0.05
-# sigma = 0.001
-# S0 = 100
-# dt = 1/12
-
+# TODO: t // dt, n % 2 != 0:
 
 def geometric_brownian_motion(
         n: int,
@@ -32,42 +26,30 @@ def geometric_brownian_motion(
         number_simulations = n + 1
     number_loops = int(number_simulations / 2)
 
+    ## natural log initial spot prices:
+    ln_S0 = log(S0)
+
     # Drift:
-    drift = (mu - 0.5 * (sigma**2)) * dt
+    drift = (mu - (0.5 * sigma**2)) * dt
     # Cumulative Drift per time point:
     drift_t = np.cumsum(np.repeat(drift, number_steps))
     # Shock:
-    shock = np.random.normal(scale=sigma * sqrt(dt), size=number_loops *
-                             number_steps).reshape((number_steps, number_loops))
+    shock = np.random.normal(loc = 0, scale=sigma, size=number_loops *
+                             number_steps).reshape((number_loops, number_steps)) * sqrt(dt)
+
     shock_cumulative = np.cumsum(shock, axis=1)
 
-    ## Total output steps includes today:
-    number_steps_output = number_steps + 1
+    ## Initial values:
+    initial = np.repeat(ln_S0, number_simulations).reshape(number_simulations, 1)
 
-    ## Output array:
-    output = np.zeros((number_steps_output, number_loops))
-    antithetic_output = np.zeros((number_steps_output, number_loops))
+    ## Output array - cols by rows:
+    output = np.zeros((number_simulations, number_steps))
 
-    ## Initial value:
-    output[0, :] = log(S0)
-    antithetic_output[0, :] = log(S0)
+    ## Thetic values:
+    output[:number_loops,:] = ln_S0 + np.add(drift_t, shock_cumulative)
+    ## Antithetic values:
+    output[(number_loops):(number_simulations+1),:] = ln_S0 + np.add(drift_t, -shock_cumulative)
 
-    # Simulated values:
-    for i in range(number_loops):
-        output[1:,i] = log(S0) + drift_t + shock_cumulative[:,i]
-        antithetic_output[1:,i] = log(S0) + drift_t - shock_cumulative[:,i]
-
-    ## Output:
-    return np.exp(np.concatenate([output, antithetic_output], axis=1))
-
-# hi = geometric_brownian_motion(
-#         n,
-#         t,
-#         mu,
-#         sigma,
-#         S0,
-#         dt
-# )
-
-# hi.shape
-# hi.max()
+    ## Final output:
+    ## TODO: Remove transpose:
+    return np.exp(np.concatenate([initial, output], axis=1)).transpose()
