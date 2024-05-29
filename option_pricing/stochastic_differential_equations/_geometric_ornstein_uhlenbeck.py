@@ -10,7 +10,7 @@ def geometric_ornstein_uhlenbeck(
         equilibrium: Number,
         risk_premium: Number,
         S0: Number,
-        dt: Number
+        time_step: Number
 ) -> np.ndarray:
     """
     Simulate the geometric Ornstein-Uhlenbeck (GOU) stochastic process through Monte Carlo simulation and antithetic variates.
@@ -23,7 +23,7 @@ def geometric_ornstein_uhlenbeck(
     risk_equilibrium = risk_premium / reversion_rate
 
     # Dimension 1:
-    number_steps = t / dt
+    number_steps = t / time_step
     number_simulated_steps = ceil(number_steps)
     # Include initial value:
     number_steps_total = number_simulated_steps + 1
@@ -42,7 +42,7 @@ def geometric_ornstein_uhlenbeck(
     antithetic_value_columns = simulated_value_columns + 1
 
     # shock:
-    shock = (np.random.normal(scale=sigma * sqrt(dt), size=number_loops * number_simulated_steps)).reshape((number_simulated_steps, number_loops))
+    shock = (np.random.normal(scale=sigma * sqrt(time_step), size=number_loops * number_simulated_steps)).reshape((number_simulated_steps, number_loops))
 
     # Output array:
     output = np.zeros((number_steps_total, number_simulations))
@@ -54,7 +54,7 @@ def geometric_ornstein_uhlenbeck(
     t = 0
     for t in range(1, number_steps_total):
 
-        drift = reversion_rate * (risk_equilibrium - output[t]) * dt
+        drift = reversion_rate * (risk_equilibrium - output[t]) * time_step
 
         # Simulated Values:
         output[t, simulated_value_columns] = output[t - 1,

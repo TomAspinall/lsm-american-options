@@ -14,7 +14,7 @@ class option_results():
             number_simulations, 
             exercise_time, 
             in_the_money_paths, 
-            dt):
+            time_step):
 
         # Option value:
         self.option_price = option_price
@@ -35,6 +35,6 @@ class option_results():
         exercise_probs = pd.DataFrame(index=range(number_periods+1))
         exercise_probs.loc[unique, 'counts'] = counts
         cumulative_exercise_probability = np.cumsum(exercise_probs['counts'].fillna(0) / number_simulations)
-        cumulative_exercise_probability.index *= dt
+        cumulative_exercise_probability.index *= time_step
         self.cumulative_exercise_probability = cumulative_exercise_probability
         return self

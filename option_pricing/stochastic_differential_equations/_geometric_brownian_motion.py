@@ -2,7 +2,7 @@ from numbers import Number
 import numpy as np
 from math import sqrt, log, ceil
 
-# TODO: t // dt, n % 2 != 0:
+# TODO: t // time_step, n % 2 != 0:
 
 def geometric_brownian_motion(
         n: int,
@@ -10,12 +10,12 @@ def geometric_brownian_motion(
         mu: Number,
         sigma: Number,
         S0: Number,
-        dt: Number
+        time_step: Number
 ) -> np.ndarray:
 
     # Dimension 1:
-    number_steps = ceil(t / dt)
-    rounded_up = divmod(t, dt)[1] > 1e-5
+    number_steps = ceil(t / time_step)
+    rounded_up = divmod(t, time_step)[1] > 1e-5
     if rounded_up:
         number_steps += 1
 
@@ -30,12 +30,12 @@ def geometric_brownian_motion(
     ln_S0 = log(S0)
 
     # Drift:
-    drift = (mu - (0.5 * sigma**2)) * dt
+    drift = (mu - (0.5 * sigma**2)) * time_step
     # Cumulative Drift per time point:
     drift_t = np.cumsum(np.repeat(drift, number_steps))
     # Shock:
     shock = np.random.normal(loc = 0, scale=sigma, size=number_loops *
-                             number_steps).reshape((number_loops, number_steps)) * sqrt(dt)
+                             number_steps).reshape((number_loops, number_steps)) * sqrt(time_step)
 
     shock_cumulative = np.cumsum(shock, axis=1)
 

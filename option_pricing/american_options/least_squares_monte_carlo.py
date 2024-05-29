@@ -12,14 +12,14 @@ from option_pricing._utils._discount import discount
 state_variables = np.array()
 
 from option_pricing.stochastic_differential_equations._geometric_brownian_motion import geometric_brownian_motion as GBM
-stock_prices = GBM(n = 10000, t=1, mu=0.06, sigma=0.2, S0=36, dt=1/50)
+stock_prices = GBM(n = 10000, t=1, mu=0.06, sigma=0.2, S0=36, time_step=1/50)
 stock_prices.max()
 
 
 def least_squares_monte_carlo(state_variables: np.ndarray,
                         payoff: np.ndarray,
                         K: Number | np.ndarray,
-                        delta_time: Number,
+                        time_step: Number,
                         risk_free_rate: Number,
                         call: bool = False,
                         orthogonal: str = "Power",
@@ -34,7 +34,7 @@ def least_squares_monte_carlo(state_variables: np.ndarray,
     number_periods, number_simulations = state_variables.shape
 
     # Nominal interest rate:
-    nominal_interest_rate = risk_free_rate * delta_time
+    nominal_interest_rate = risk_free_rate * time_step
     # Corresponding discount:
     discount_rate = discount(nominal_interest_rate)
 
@@ -138,6 +138,6 @@ def least_squares_monte_carlo(state_variables: np.ndarray,
     option_price = mean(option_values)
 
     # Execise time:
-    exercise_time = (exercise_period - 1) * delta_time
+    exercise_time = (exercise_period - 1) * time_step
 
-    return option_results(option_price, option_values, number_simulations, exercise_time, in_the_money_paths, delta_time)
+    return option_results(option_price, option_values, number_simulations, exercise_time, in_the_money_paths, time_step)

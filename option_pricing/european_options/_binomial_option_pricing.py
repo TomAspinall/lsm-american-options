@@ -7,21 +7,9 @@ from .._utils._discount import discount
 # def discount(interest_rate, time_period=1): 
 #     return exp(-interest_rate*time_period)
 
-# Functions for probabilities & tree prices:
-# r = 0.05
-# delta_t = 1
-# sigma = 0.4
-# stock_price = 18.01
-# strike_price = 18.01
-# n = 2
-# call_option = True
-
-
-## TODO - 1 iteration only.
-
 def binomial_option_pricing_model(
-    r,
-    delta_t,
+    risk_free_rate,
+    time_step,
     sigma,
     stock_price,
     strike_price,
@@ -30,17 +18,17 @@ def binomial_option_pricing_model(
 ):
 
     ## Discount / premium rate between discrete steps:
-    discount_rate = discount(r, delta_t)
-    premium_rate = discount(-r, delta_t)
+    discount_rate = discount(risk_free_rate, time_step)
+    premium_rate = discount(-risk_free_rate, time_step)
 
     ## Number of Discrete time steps:
-    number_periods = n / delta_t
+    number_periods = n / time_step
     ## Total Periods evaluated (int):
     total_periods = ceil(number_periods)
 
     ## Risk Neutral Probabilites:
-    prob_up   = exp(sigma * sqrt(delta_t))
-    prob_down =  exp(-sigma * sqrt(delta_t))
+    prob_up   = exp(sigma * sqrt(time_step))
+    prob_down =  exp(-sigma * sqrt(time_step))
     
     ## Length of output:
     cols = np.arange(start=1, stop=total_periods+1)

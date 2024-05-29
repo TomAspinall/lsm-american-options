@@ -10,14 +10,14 @@ def inhomogeneous_geometric_brownian_motion(
         equilibrium: Number,
         sigma: Number,
         S0: Number,
-        dt: Number
+        time_step: Number
 ) -> np.ndarray:
 
     # Constant:
     adjusted_risk = 0.5 * (sigma ** 2)
 
     # Dimension 1:
-    number_steps = t / dt
+    number_steps = t / time_step
     number_simulated_steps = ceil(number_steps)
     # Include initial value:
     number_steps_total = number_simulated_steps + 1
@@ -37,7 +37,7 @@ def inhomogeneous_geometric_brownian_motion(
     antithetic_value_columns = simulated_value_columns + 1
 
     # shock:
-    shock = (np.random.normal(scale=sigma * sqrt(dt), size=number_loops * number_simulated_steps)).reshape((number_simulated_steps, number_loops))
+    shock = (np.random.normal(scale=sigma * sqrt(time_step), size=number_loops * number_simulated_steps)).reshape((number_simulated_steps, number_loops))
 
     # Output array:
     output = np.zeros((number_steps_total, number_simulations))
@@ -53,7 +53,7 @@ def inhomogeneous_geometric_brownian_motion(
 
         # Mean-reverting drift:
         drift = (reversion_rate * ((equilibrium - output_exp_t) /
-                 output_exp_t) - adjusted_risk) * dt
+                 output_exp_t) - adjusted_risk) * time_step
 
         # Simulated Values:
         output[t + 1, simulated_value_columns] = output[t,

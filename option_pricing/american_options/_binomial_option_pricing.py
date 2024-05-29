@@ -13,7 +13,7 @@ def discount(interest_rate, time_period=1):
 r = 0.05
 strike_price = 20
 
-delta_t = 1
+time_step = 1
 stock_price = 18.01
 n = 40
 call_option = False
@@ -29,7 +29,7 @@ sigma = 0.4683
 
 def binomial_option_pricing_model(
     r,
-    delta_t,
+    time_step,
     sigma,
     stock_price,
     strike_price,
@@ -38,11 +38,11 @@ def binomial_option_pricing_model(
 ):
 
     ## Discount / premium rate between discrete steps:
-    discount_rate = discount(r, delta_t)
-    premium_rate = discount(-r, delta_t)
+    discount_rate = discount(r, time_step)
+    premium_rate = discount(-r, time_step)
 
     ## Number of Discrete time steps:
-    number_periods = n / delta_t
+    number_periods = n / time_step
     ## Total Periods evaluated (int):
     total_periods = ceil(number_periods)
 
@@ -50,8 +50,8 @@ def binomial_option_pricing_model(
     out_shape = (total_periods, total_periods)
 
     ## Risk Neutral Probabilites:
-    prob_up   = exp(sigma * sqrt(delta_t))
-    prob_down =  exp(-sigma * sqrt(delta_t))
+    prob_up   = exp(sigma * sqrt(time_step))
+    prob_down =  exp(-sigma * sqrt(time_step))
     
     ## Discount likelihood according to probabilities:
     probability = (premium_rate-prob_down)/(prob_up-prob_down) if prob_up-prob_down != 0 else 1
