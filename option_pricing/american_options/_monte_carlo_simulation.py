@@ -9,25 +9,25 @@ from .._utils._discount import discount
 from option_pricing._utils._continuation_value import estimate_continuation_value
 from option_pricing._utils._discount import discount
 
-n = int(1e4)
-t = 1
-S0 = 40
-# risk_free_rate = 0.06
-risk_free_rate = 0.0
-sigma = 0.0001
-time_step = 1/50
+# n = int(1e4)
+# t = 1
+# S0 = 40
+# # risk_free_rate = 0.06
+# risk_free_rate = 0.0
+# sigma = 0.0001
+# time_step = 1/50
 
-from option_pricing.stochastic_differential_equations._geometric_brownian_motion import geometric_brownian_motion as GBM
-# Step 1 - Simulate stock prices:
-stock_prices = GBM(n, t, risk_free_rate, sigma, S0, time_step)
+# from option_pricing.stochastic_differential_equations._geometric_brownian_motion import geometric_brownian_motion as GBM
+# # Step 1 - Simulate stock prices:
+# stock_prices = GBM(n, t, risk_free_rate, sigma, S0, time_step)
 
-state_variables = stock_prices
-payoff = stock_prices
-strike_price = S0
-call = False
-orthogonal = "Power"
-degree = 2
-cross_product = True
+# state_variables = stock_prices
+# payoff = stock_prices
+# strike_price = S0
+# call = False
+# orthogonal = "Power"
+# degree = 2
+# cross_product = True
 
 
 def monte_carlo_simulation(state_variables: numpy.ndarray,
@@ -104,7 +104,7 @@ def monte_carlo_simulation(state_variables: numpy.ndarray,
     american_option_value[exercise] = profit[-1, exercise]
 
     # Was the option exercised?
-    exercise_timing[exercise] = t
+    exercise_timing[exercise] = termination_period
 
     ## American Options hold value in waiting:
     ## Backwards induction begin:
@@ -113,7 +113,7 @@ def monte_carlo_simulation(state_variables: numpy.ndarray,
         # t is representative of the index for time, but in reality the actual time period you're in is (t-1).
 
         ## Forward insight (high bias) - the immediate payoff of exercise:
-        profit[t, :] = profit_function(payoff[-1, :], strike_price)
+        profit[t, :] = profit_function(payoff[t+1, :], strike_price)
         profit_t = profit[t, :]
 
         # We only consider the exercise / delay exercise decision for price paths that are in the money (ie. profit from immediate exercise > 0):
@@ -135,7 +135,6 @@ def monte_carlo_simulation(state_variables: numpy.ndarray,
                 degree=degree,
                 cross_product=cross_product)
 
-        # STEP THREE:
         # Dynamic programming:
         exercise = profit[t,] > continuation_value
 
@@ -150,8 +149,8 @@ def monte_carlo_simulation(state_variables: numpy.ndarray,
         # Re-iterate.
     # End backwards induction.
 
-    # Calculate project value -  discount payoffs
-    option_values = numpy.repeat(0, number_simulations)
+    return numpy.mean(american_option_value)
+
 
     # American option value - discounting payoffs back to time zero, averaging over all paths.
     exercised = ~numpy.isnan(exercise_timing)
@@ -164,5 +163,4 @@ def monte_carlo_simulation(state_variables: numpy.ndarray,
     # Execise time:
     exercise_time = (exercise_period - 1) * time_step
 
-    return numpy.mean(option_values)
     # return option_results(option_price, option_values, number_simulations, exercise_time, in_the_money_paths, time_step)
