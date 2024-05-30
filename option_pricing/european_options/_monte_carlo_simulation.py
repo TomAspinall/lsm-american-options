@@ -1,6 +1,7 @@
 ## Imports:
 from numbers import Number
 import numpy
+from typing import Optional
 
 ## Local Imports:
 from .._utils._discount import discount
@@ -10,7 +11,7 @@ def monte_carlo_simulation(payoff: numpy.array,
                         n: Number,
                         time_step: Number,
                         risk_free_rate: Number,
-                        call_option: bool = False,
+                        call_option: Optional[bool] = False,
                         ):
 
     # Nominal interest rate:
