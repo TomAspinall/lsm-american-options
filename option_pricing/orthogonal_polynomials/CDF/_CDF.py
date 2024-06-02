@@ -35,8 +35,8 @@ Possible orthogonal CDF's:
 # Power (early return, no cumulation required):
 
 def power(
-        n: int,
         x: _Union[list, _np_array, _np_ndarray], 
+        n: int,
         ) -> list:
     
     ## N = n:
@@ -57,8 +57,8 @@ def power(
 # Laguerre - CDF:
 
 def laguerre(
-        n: int, 
         x: _Union[list, _np_array, _np_ndarray],
+        n: int, 
         ) -> list:
 
     ## Iteration for polynomial:
@@ -79,8 +79,8 @@ def laguerre(
 # Legendre:
 
 def legendre(
-        n: int, 
         x: _Union[list, _np_array, _np_ndarray],
+        n: int, 
         ) -> list:
 
     ## Iteration for polynomial:
@@ -101,8 +101,8 @@ def legendre(
 # Chebyshev:
 
 def chebyshev(
-        n: int, 
         x: _Union[list, _np_array, _np_ndarray],
+        n: int, 
         ) -> list:
 
     ## Iteration for polynomial:
@@ -123,8 +123,8 @@ def chebyshev(
 # Hermite:
 
 def hermite(
-        n: int, 
         x: _Union[list, _np_array, _np_ndarray],
+        n: int, 
         ) -> list:
 
     ## Utilises N/2:
@@ -145,10 +145,8 @@ def hermite(
 # Jacobi:
 
 def jacobi(
-        n: int, 
         x: _Union[list, _np_array, _np_ndarray],
-        alpha: float = 0.0,
-        beta: float = 0.0,
+        n: int, 
         ) -> list:
 
     ## Iteration for polynomial:
