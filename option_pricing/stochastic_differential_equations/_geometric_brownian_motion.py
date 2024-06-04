@@ -15,9 +15,9 @@ def geometric_brownian_motion(
 
     # Dimension 1:
     number_steps = ceil(t / time_step)
-    rounded_up = divmod(t, time_step)[1] > 1e-5
-    if rounded_up:
-        number_steps += 1
+    # rounded_up = divmod(t, time_step)[1] > 1e-5
+    # if rounded_up:
+    #     number_steps += 1
 
     # Dimension 2:
     if n % 2 == 0:

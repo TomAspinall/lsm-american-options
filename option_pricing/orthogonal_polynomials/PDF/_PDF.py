@@ -5,10 +5,21 @@ from math import comb as  _comb
 ################# Orthogonal Probability Density Functions: ##################
 ##############################################################################
 
-# Laguerre:
+"""
+probability density functions of available orthogonal polynomials.
+
+Possible orthogonal PDF's:
+    POWER
+    LAGUERRE
+    LEGENDRE
+    CHEBYSHEV
+    HERMITE
+    JACOBI
+"""
+
 
 def laguerre(n, m, x):
-    c_x = (-1 ** m) * _comb(n, n-m) * (1/_factorial(m))
+    c_x = ((-1) ** m) * _comb(n, n-m) * (1/_factorial(m))
     g_m_x = x ** m
     return c_x * g_m_x
 

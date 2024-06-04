@@ -7,31 +7,6 @@ from .._utils._continuation_value import estimate_continuation_value
 from .._utils._discount import discount
 from .._utils._option_results import AmericanOption
 
-from option_pricing._utils._continuation_value import estimate_continuation_value
-from option_pricing._utils._discount import discount
-from option_pricing._utils._option_results import AmericanOption
-
-# n = 100
-# t = 1
-# S0 = 36
-# risk_free_rate = 0.06
-# sigma = 0.2
-# time_step = 1/50
-
-# from option_pricing.stochastic_differential_equations._geometric_brownian_motion import geometric_brownian_motion as GBM
-# Step 1 - Simulate stock prices:
-# stock_prices = GBM(n, t, risk_free_rate, sigma, S0, time_step, testing=True)
-# stock_prices[-1]
-
-# state_variables = stock_prices
-# payoff = stock_prices
-# strike_price = 40
-# call_option = False
-# orthogonal = "Power"
-# degree = 2
-# cross_product = True
-
-
 def monte_carlo_simulation(state_variables: np.ndarray,
                         payoff: np.ndarray,
                         strike_price: Union[Number, np.ndarray],
