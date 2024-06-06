@@ -4,13 +4,23 @@ from math import sqrt, log, ceil
 
 # TODO: t // time_step, n % 2 != 0:
 
+n = 100
+t = 1
+mu = 0.06
+sigma = 0.2
+S0 = 36
+time_step = 1/12
+# time_step = 1/50
+testing = True
+
 def geometric_brownian_motion(
         n: int,
         t: Number,
         mu: Number,
         sigma: Number,
         S0: Number,
-        time_step: Number
+        time_step: Number,
+        testing: bool = True
 ) -> np.ndarray:
 
     # Dimension 1:
@@ -36,6 +46,11 @@ def geometric_brownian_motion(
     # Shock:
     shock = np.random.normal(loc = 0, scale=sigma, size=number_loops *
                              number_steps).reshape((number_loops, number_steps)) * sqrt(time_step)
+    
+    if testing:
+        for i in range(number_loops):
+            shock[i,:] = np.arange(0, number_steps / 100,  0.01)
+    
 
     shock_cumulative = np.cumsum(shock, axis=1)
 

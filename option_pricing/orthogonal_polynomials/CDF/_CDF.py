@@ -1,3 +1,11 @@
+from option_pricing.orthogonal_polynomials.PDF._PDF import (
+    laguerre as laguerre_PDF,
+    legendre as legendre_PDF,
+    chebyshev as chebyshev_PDF,
+    hermite as hermite_PDF,
+    jacobi as jacobi_PDF,
+)
+
 from ..PDF._PDF import (
     laguerre as laguerre_PDF,
     legendre as legendre_PDF,
@@ -45,11 +53,6 @@ def power(
     ## d_n multiplier:
     d_n = 1
 
-    ## Catch:
-    if N % 1 != 0:
-        N = _floor(N)
-        Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
-
     ## Unique (no cumulation / early return:)
     return d_n * (x ** N)
 
@@ -63,11 +66,6 @@ def laguerre(
 
     ## Iteration for polynomial:
     N = n
-
-    ## Catch:
-    if N % 1 != 0:
-        N = _floor(N)
-        Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
 
     ## d_n multiplier:
     d_n = 1
@@ -88,14 +86,13 @@ def legendre(
 
     ## Catch:
     if N % 1 != 0:
-        N = _floor(N)
         Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
-
+    N = _floor(N) + 1
+        
     ## d_n multiplier:
     d_n = 1 / 2 ** n
 
-    ## Perform cumulation:
-    return d_n * sum((legendre_PDF(n, m, x) for m in range(N+1)))
+    return d_n * sum((legendre_PDF(n, m, x) for m in range(N)))
 
 
 # Chebyshev:
@@ -112,6 +109,8 @@ def chebyshev(
     if N % 1 != 0:
         N = _floor(N)
         Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
+    else:
+        N = int(N)
 
     ## d_n multiplier:
     d_n = n / 2
@@ -134,6 +133,8 @@ def hermite(
     if N % 1 != 0:
         N = _floor(N)
         Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
+    else:
+        N = int(N)
 
     ## d_n multiplier:
     d_n = _factorial(N)
@@ -151,11 +152,6 @@ def jacobi(
 
     ## Iteration for polynomial:
     N = n
-
-    ## Catch:
-    if N % 1 != 0:
-        N = _floor(N)
-        Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
 
     ## d_n multiplier:
     d_n = 1 / 2 ** n
