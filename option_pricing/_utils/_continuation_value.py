@@ -55,7 +55,7 @@ def estimate_continuation_value(
     ## TODO - Increase efficiency:
     if cross_product and state_variables_t_in_the_money.shape[1] > 1:
         for i in range(state_variables_t_in_the_money.shape[1]):
-            for j in range(1, state_variables_t_in_the_money.shape[1] + 1):
+            for j in range(i+1, state_variables_t_in_the_money.shape[1]):
                 regression_matrix = np.c_[ state_variables_t_in_the_money[:, i] * state_variables_t_in_the_money[:, j], regression_matrix]
 
     ## Obtain Orthogonal polynomials:
