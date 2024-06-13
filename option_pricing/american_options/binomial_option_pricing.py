@@ -2,11 +2,10 @@
 from math import exp, sqrt, ceil
 import numpy as np
 
-## Discount Factor:
-from .._utils._discount import discount
+# __name__ = 'option_pricing.american_options.binomial_option_pricing'
 
-def discount(interest_rate, time_period=1): 
-    return exp(-interest_rate*time_period)
+## Discount Factor:
+from .._utils.discount import discount
 
 # Functions for probabilities & tree prices:
 

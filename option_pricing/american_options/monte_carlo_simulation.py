@@ -2,18 +2,16 @@ import numpy as np
 from numbers import Number
 from typing import Optional, Union
 
+# __name__ = 'option_pricing.american_options.monte_carlo_simulation'
+
 # Requirements:
-from .._utils._continuation_value import estimate_continuation_value
-from .._utils._discount import discount
-from .._utils._option_results import AmericanOption
+from .._utils.continuation_value import estimate_continuation_value
+from .._utils.discount import discount
+from .._utils.option_results import AmericanOption
 
-# from option_pricing._utils._continuation_value import estimate_continuation_value
-# from option_pricing._utils._discount import discount
-# from option_pricing._utils._option_results import AmericanOption
-
-# orthogonal = "Power"
-# degree = 2
-# cross_product = True
+orthogonal = "Power"
+degree = 2
+cross_product = True
 
 def monte_carlo_simulation(state_variables: np.ndarray,
                         payoff: np.ndarray,

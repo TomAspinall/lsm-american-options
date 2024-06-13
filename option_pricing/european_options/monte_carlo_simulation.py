@@ -3,8 +3,10 @@ from numbers import Number
 import numpy
 from typing import Optional
 
+# __name__ = 'option_pricing.european_options.monte_carlo_simulation'
+
 ## Local Imports:
-from .._utils._discount import discount
+from .._utils.discount import discount
 
 def monte_carlo_simulation(payoff: numpy.array,
                         strike_price: Number,

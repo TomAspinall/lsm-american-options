@@ -1,12 +1,8 @@
-from option_pricing.orthogonal_polynomials.PDF._PDF import (
-    laguerre as laguerre_PDF,
-    legendre as legendre_PDF,
-    chebyshev as chebyshev_PDF,
-    hermite as hermite_PDF,
-    jacobi as jacobi_PDF,
-)
 
-from ..PDF._PDF import (
+# __name__ = 'option_pricing.orthogonal_polynomials.CDF.CDF'
+
+
+from ..PDF.PDF import (
     laguerre as laguerre_PDF,
     legendre as legendre_PDF,
     chebyshev as chebyshev_PDF,
@@ -41,6 +37,9 @@ Possible orthogonal CDF's:
 """
 
 # Power (early return, no cumulation required):
+
+# x = range(20)
+# n = 2
 
 def power(
         x: _Union[list, _np_array, _np_ndarray], 

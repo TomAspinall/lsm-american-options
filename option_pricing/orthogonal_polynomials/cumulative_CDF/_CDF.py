@@ -1,19 +1,13 @@
-from ..PDF._PDF import (
+
+# __name__ = 'option_pricing.orthogonal_polynomials.cumulative_CDF.CDF'
+
+from ..PDF.PDF import (
     laguerre as laguerre_PDF,
     legendre as legendre_PDF,
     chebyshev as chebyshev_PDF,
     hermite as hermite_PDF,
     jacobi as jacobi_PDF,
 )
-
-from option_pricing.orthogonal_polynomials.PDF._PDF import (
-    laguerre as laguerre_PDF,
-    legendre as legendre_PDF,
-    chebyshev as chebyshev_PDF,
-    hermite as hermite_PDF,
-    jacobi as jacobi_PDF,
-)
-
 
 from math import floor as _floor
 from math import factorial as _factorial

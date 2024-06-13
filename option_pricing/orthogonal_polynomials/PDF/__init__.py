@@ -1,7 +1,7 @@
 
 from ._version import __version__
 
-from ._PDF import (
+from .PDF import (
     chebyshev,
     laguerre,
     legendre,
