@@ -1,5 +1,5 @@
 
-# __name__ = 'option_pricing.orthogonal_polynomials.cumulative_CDF.CDF'
+__name__ = 'option_pricing.orthogonal_polynomials.cumulative_CDF.CDF'
 
 from ..PDF.PDF import (
     laguerre as laguerre_PDF,
@@ -36,7 +36,6 @@ Possible orthogonal CDF's:
 """
 
 # Power (early return, no cumulation required):
-
 def power(
         x: np.ndarray, 
         n: int,
@@ -48,23 +47,26 @@ def power(
     else:
         return x
 
-# Laguerre:
 
 def laguerre(
         x: np.ndarray,
         n: int, 
         ) -> list:
-
+    
     ## Iteration for polynomial:
     N = n
 
-    ## PDF's:
-    PDFs = np.c_[[laguerre_PDF(n, m, x) for m in range(1, N+1)]]
-    ## CDFs:
-    CDFs = np.cumsum(PDFs, axis=0)
-    ## Reshape and output:
-    return CDFs.reshape(CDFs.shape[0] * CDFs.shape[2], CDFs.shape[1]).T   
+    ## Free the respective memory:
+    CDFs = np.zeros(shape=x.shape)
 
+    ## CDF's:
+    ## Despite traditional polynomials occurring from 0, The Laguerre PDF at 0 returns the constant 1.
+    ## Iterate:
+    for m in range(N+1):
+        CDFs += laguerre_PDF(n, m, x)
+
+    ## Reshape and output:
+    return CDFs.T
 
 # Legendre:
 

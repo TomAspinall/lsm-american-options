@@ -1,7 +1,7 @@
 
 from ._version import __version__
 
-from ._CDF import (
+from .CDF import (
     power,
     laguerre,
     legendre,
