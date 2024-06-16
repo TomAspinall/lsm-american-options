@@ -4,14 +4,14 @@ from math import sqrt, log, ceil
 
 # TODO: t // time_step, n % 2 != 0:
 
-n = 100
-t = 1
-mu = 0.06
-sigma = 0.2
-S0 = 36
-time_step = 1/12
-# time_step = 1/50
-testing = True
+# n = 100
+# t = 1
+# mu = 0.06
+# sigma = 0.2
+# S0 = 36
+# time_step = 1/12
+# # time_step = 1/50
+# testing = True
 
 def geometric_brownian_motion(
         n: int,
@@ -49,8 +49,7 @@ def geometric_brownian_motion(
     
     if testing:
         for i in range(number_loops):
-            shock[i,:] = np.arange(0, number_steps / 100,  0.01)
-    
+            shock[i,:] = np.arange(0, number_steps / 100,  0.01)  * 0.05    
 
     shock_cumulative = np.cumsum(shock, axis=1)
 
@@ -66,5 +65,4 @@ def geometric_brownian_motion(
     output[(number_loops):(number_simulations+1),:] = ln_S0 + np.add(drift_t, -shock_cumulative)
 
     ## Final output:
-    ## TODO: Remove transpose:
     return np.exp(np.concatenate([initial, output], axis=1)).transpose()

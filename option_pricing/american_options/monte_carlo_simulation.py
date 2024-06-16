@@ -9,10 +9,6 @@ from .._utils.continuation_value import estimate_continuation_value
 from .._utils.discount import discount
 from .._utils.option_results import AmericanOption
 
-orthogonal = "Power"
-degree = 2
-cross_product = True
-
 def monte_carlo_simulation(state_variables: np.ndarray,
                         payoff: np.ndarray,
                         strike_price: Union[Number, np.ndarray],
@@ -27,7 +23,7 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     ## State variables must be coerced as a 3-d array:
     if state_variables.ndim < 3:
         state_variables = state_variables.reshape(state_variables.shape + (1,))
-
+    
     ## Const:
 
     # length rolumns: # simulations
@@ -86,7 +82,8 @@ def monte_carlo_simulation(state_variables: np.ndarray,
 
     ## American Options hold value in waiting:
     ## Backwards induction begin:
-    t = termination_period -1 
+    # t = termination_period -1 
+    # t = termination_period -2
     for t in range(termination_period - 1, -1, -1):
 
         ## Forward insight (high bias) - the immediate payoff of exercise:
@@ -123,6 +120,9 @@ def monte_carlo_simulation(state_variables: np.ndarray,
 
         # Re-iterate.
     # End backwards induction.
+
+    ## TODO: One more required?
+    american_option_value = american_option_value * discount_rate
 
     ## Evaluate outputs:
     return AmericanOption(

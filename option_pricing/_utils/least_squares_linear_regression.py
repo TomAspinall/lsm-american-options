@@ -1,4 +1,6 @@
 import numpy
+import scipy
+from scipy import linalg
 
 ## Perform least squares linear regression and return fitted values:
 def least_squares_linear_regression_fitted_values(
@@ -13,10 +15,12 @@ def least_squares_linear_regression_fitted_values(
 
     ## Direct least-square regression:
     dot_product = A.T @ A
-    if numpy.linalg.det(dot_product) != 0:
-        inv_matrix = numpy.linalg.inv(dot_product)
+    if numpy.linalg.det(dot_product) > 0:
+        # inv_matrix = numpy.linalg.inv(dot_product)
+        inv_matrix = scipy.linalg.inv(dot_product)        
     else:
-        inv_matrix = numpy.linalg.pinv(dot_product)
+        # inv_matrix = numpy.linalg.pinv(dot_product)
+        inv_matrix = scipy.linalg.pinv(dot_product)
     
     ## Estimated regressors:
     alpha = inv_matrix @ A.T @ dependent_variable

@@ -38,13 +38,10 @@ Possible orthogonal CDF's:
 
 # Power (early return, no cumulation required):
 
-# x = range(20)
-# n = 2
-
 def power(
         x: _Union[list, _np_array, _np_ndarray], 
         n: int,
-        ) -> list:
+        ) -> _np_ndarray:
     
     ## N = n:
     N = n
@@ -61,7 +58,7 @@ def power(
 def laguerre(
         x: _Union[list, _np_array, _np_ndarray],
         n: int, 
-        ) -> list:
+        ) -> _np_ndarray:
 
     ## Iteration for polynomial:
     N = n
@@ -78,15 +75,17 @@ def laguerre(
 def legendre(
         x: _Union[list, _np_array, _np_ndarray],
         n: int, 
-        ) -> list:
+        ) -> _np_ndarray:
 
     ## Iteration for polynomial:
     N = n / 2
 
     ## Catch:
     if N % 1 != 0:
-        Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
-    N = _floor(N) + 1
+        N = _floor(N)
+        Warning(f"Orthogonal weighting parameter (n) rounded down from {N+1} to {N}")
+    else:
+        N = int(N)
         
     ## d_n multiplier:
     d_n = 1 / 2 ** n
@@ -99,7 +98,7 @@ def legendre(
 def chebyshev(
         x: _Union[list, _np_array, _np_ndarray],
         n: int, 
-        ) -> list:
+        ) -> _np_ndarray:
 
     ## Iteration for polynomial:
     N = n / 2
@@ -107,7 +106,7 @@ def chebyshev(
     ## Catch:
     if N % 1 != 0:
         N = _floor(N)
-        Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
+        Warning(f"Orthogonal weighting parameter (n) rounded down from {N+1} to {N}")
     else:
         N = int(N)
 
@@ -123,7 +122,7 @@ def chebyshev(
 def hermite(
         x: _Union[list, _np_array, _np_ndarray],
         n: int, 
-        ) -> list:
+        ) -> _np_ndarray:
 
     ## Utilises N/2:
     N = n / 2
@@ -131,7 +130,7 @@ def hermite(
     ## Catch:
     if N % 1 != 0:
         N = _floor(N)
-        Warning(f"Orthogonal weighting parameter (n) rounded down from {n} to {N}")
+        Warning(f"Orthogonal weighting parameter (n) rounded down from {N+1} to {N}")
     else:
         N = int(N)
 
@@ -147,7 +146,9 @@ def hermite(
 def jacobi(
         x: _Union[list, _np_array, _np_ndarray],
         n: int, 
-        ) -> list:
+        alpha: _Union[float, int] = 0,
+        beta: _Union[float, int] = 0
+        ) -> _np_ndarray:
 
     ## Iteration for polynomial:
     N = n
@@ -156,4 +157,4 @@ def jacobi(
     d_n = 1 / 2 ** n
 
     ## Perform cumulation:
-    return d_n * sum((jacobi_PDF(n, m, x) for m in range(N+1)))
+    return d_n * sum((jacobi_PDF(n, m, x, alpha=alpha, beta=beta) for m in range(N+1)))
