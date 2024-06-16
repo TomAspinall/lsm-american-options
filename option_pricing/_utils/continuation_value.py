@@ -2,22 +2,22 @@ import numpy as np
 
 __name__ = 'option_pricing._utils.continuation_value'
 
-from .least_squares_linear_regression import least_squares_linear_regression_fitted_values
-from ..orthogonal_polynomials.cumulative_CDF import (
-        power,
-        laguerre,
-        legendre,
-        chebyshev,
-        hermite,
-        jacobi,
+from numpy.polynomial import (
+    polynomial,
+    laguerre,
+    chebyshev,
+    legendre,
+    hermite
 )
 
-orthogonal_functions = {"POWER": power,
-        "LAGUERRE": laguerre,
-        "LEGENDRE": legendre,
-        "CHEBYSHEV": chebyshev,
-        "HERMITE": hermite,
-        "JACOBI": jacobi}
+## Available Numpy implementations of orthogonal polynomials:
+orthogonal_functions = {
+    "POWER": polynomial.polyval,
+    "LAGUERRE": laguerre.lagval,
+    "LEGENDRE": legendre.legval,
+    "CHEBYSHEV": chebyshev.chebval,
+    "HERMITE": hermite.hermval,
+    }
 
 ##############################################################################
 ####################### ESTIMATED CONTINUATION VALUE: ########################
@@ -44,9 +44,15 @@ def estimate_continuation_value(
     if state_variables_t_in_the_money.ndim == 1:
         state_variables_t_in_the_money = state_variables_t_in_the_money[:, np.newaxis]
 
-    ## Obtain Orthogonal polynomials:
-    regression_matrix = state_variables_t_in_the_money.copy()
-    regression_matrix = np.c_[ regression_matrix, orthogonal_function(regression_matrix, degree)]
+    ## Independendent variables:
+    regression_matrix = np.c_[
+        ## Intercept:
+        np.ones(len(state_variables_t_in_the_money)),
+        ## State Variables are included within the regression:
+        state_variables_t_in_the_money,
+        ## Obtain the first n orthogonal polynomials:
+        np.concatenate([orthogonal_function(state_variables_t_in_the_money, np.eye(1, n+1, n)[0]) for n in range(1, degree + 1)], axis=1)
+    ]
 
     ## Cross products:
     ## TODO - Increase efficiency:
@@ -61,8 +67,5 @@ def estimate_continuation_value(
     ## Perform Least-Squares regression and obtain fitted values:
     A = np.c_[ np.ones(len(regression_matrix)), regression_matrix.copy()]
     continuation_value[in_the_money_paths] = A @ np.linalg.lstsq(A, continuation_value_in_the_money, rcond=None)[0]
-
-    ## Option 2:
-    # continuation_value[in_the_money_paths] = least_squares_linear_regression_fitted_values(regression_matrix.copy(), continuation_value_in_the_money)
 
     return continuation_value
