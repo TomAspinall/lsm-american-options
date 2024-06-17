@@ -1,6 +1,6 @@
 import numpy as np
 
-__name__ = 'option_pricing._utils.continuation_value'
+# __name__ = 'option_pricing._utils.continuation_value'
 
 from numpy.polynomial import (
     polynomial,
@@ -46,26 +46,24 @@ def estimate_continuation_value(
 
     ## Independendent variables:
     regression_matrix = np.c_[
-        ## Intercept:
-        np.ones(len(state_variables_t_in_the_money)),
-        ## State Variables are included within the regression:
-        state_variables_t_in_the_money,
-        ## Obtain the first n orthogonal polynomials:
-        np.concatenate([orthogonal_function(state_variables_t_in_the_money, np.eye(1, n+1, n)[0]) for n in range(1, degree + 1)], axis=1)
+        ## Obtain an intercept and the first n orthogonal polynomials:
+        np.concatenate(orthogonal_function(state_variables_t_in_the_money, np.eye(degree+1)), axis=1),
+        ## The state variables themselves are included within the regression:
+        state_variables_t_in_the_money
     ]
 
-    ## Cross products:
-    ## TODO - Increase efficiency:
-    if cross_product and state_variables_t_in_the_money.shape[1] >= 1:
-        for i in range(state_variables_t_in_the_money.shape[1]):
-            for j in range(i+1, state_variables_t_in_the_money.shape[1]):
-                regression_matrix = np.c_[ state_variables_t_in_the_money[:, i] * state_variables_t_in_the_money[:, j], regression_matrix]
-
-    ## The Independent Variables within the least-squares includes the actual values, as well as their orthogonal weights:
-    ## Dependent variable is continuation_value_in_the_money:
+    ## Append cross products:
+    number_state_variables = state_variables_t_in_the_money.shape[1]
+    if cross_product and number_state_variables > 1:
+        regression_matrix = np.concatenate([regression_matrix] + \
+                                                [ state_variables_t_in_the_money[:, i] * state_variables_t_in_the_money[:, j] \
+                                                for i in range(number_state_variables) \
+                                                for j in range(i+1, number_state_variables)
+                                                ]
+                                            ,axis=1
+                                            )
 
     ## Perform Least-Squares regression and obtain fitted values:
-    A = np.c_[ np.ones(len(regression_matrix)), regression_matrix.copy()]
-    continuation_value[in_the_money_paths] = A @ np.linalg.lstsq(A, continuation_value_in_the_money, rcond=None)[0]
+    continuation_value[in_the_money_paths] = regression_matrix @ np.linalg.lstsq(regression_matrix, continuation_value_in_the_money, rcond=None)[0]
 
     return continuation_value

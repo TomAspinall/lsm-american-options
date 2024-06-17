@@ -2,8 +2,6 @@ import numpy as np
 from numbers import Number
 from typing import Optional, Union
 
-# __name__ = 'option_pricing.american_options.monte_carlo_simulation'
-
 # Requirements:
 from .._utils.continuation_value import estimate_continuation_value
 from .._utils.discount import discount
@@ -11,7 +9,7 @@ from .._utils.option_results import AmericanOption
 
 def monte_carlo_simulation(state_variables: np.ndarray,
                         payoff: np.ndarray,
-                        strike_price: Union[Number, np.ndarray],
+                        strike_price: Number,
                         time_step: Number,
                         risk_free_rate: Number,
                         call_option: Optional[bool] = True,
@@ -23,7 +21,7 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     ## State variables must be coerced as a 3-d array:
     if state_variables.ndim < 3:
         state_variables = state_variables.reshape(state_variables.shape + (1,))
-    
+
     ## Const:
 
     # length rolumns: # simulations
@@ -42,8 +40,8 @@ def monte_carlo_simulation(state_variables: np.ndarray,
 
     # Assertions:
     # assert type(K) is Number and not len(K) == number_simulations, "length of object 'K' does not equal 1 or number of columns of 'state_variables'!"
-    assert not np.isnan(state_variables).any(), "NA's have been specified within 'state_variables'!"
-    # assert state_variables.shape == payoff.shape, "Dimensions of object 'state_variables' does not match 'payoff'!"
+    assert not np.isnan(state_variables).any(), "NA's cannot be specified within 'state_variables'"
+    assert number_periods == payoff.shape[0] and number_simulations == payoff.shape[1], "The first 2 dimensions of 'state_variables' must match the dimensions of 'payoff'"
 
     ##############################################################################
     ######################## Initialise Memory Objects: ##########################
@@ -82,13 +80,10 @@ def monte_carlo_simulation(state_variables: np.ndarray,
 
     ## American Options hold value in waiting:
     ## Backwards induction begin:
-    # t = termination_period -1 
-    # t = termination_period -2
     for t in range(termination_period - 1, -1, -1):
 
         ## Forward insight (high bias) - the immediate payoff of exercise:
-        profit[t, :] = profit_function(payoff[t, :], strike_price)
-        profit_t = profit[t, :]
+        profit[t, :] = profit_t = profit_function(payoff[t, :], strike_price)
 
         # We only consider the exercise / delay exercise decision for price paths that are in the money (ie. profit from immediate exercise > 0):
         state_variables_t = state_variables[t, :, :]
@@ -108,12 +103,12 @@ def monte_carlo_simulation(state_variables: np.ndarray,
                 cross_product=cross_product)
 
         # Dynamic programming:
-        exercise = profit[t,] > continuation_value
+        exercise = profit_t > continuation_value
 
         # Discount existing values if not exercising
         american_option_value[~exercise] = american_option_value[~exercise] * discount_rate
         # Receive immediate profit if exercising
-        american_option_value[exercise] = profit[t, exercise]
+        american_option_value[exercise] = profit_t[exercise]
 
         # Was the option exercised?
         exercise_time[exercise] = t
