@@ -44,17 +44,8 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     assert number_periods == payoff.shape[0] and number_simulations == payoff.shape[1], "The first 2 dimensions of 'state_variables' must match the dimensions of 'payoff'"
 
     ##############################################################################
-    ######################## Initialise Memory Objects: ##########################
+    ################### Calculate Immediate Payoff (High Bias): ##################
     ##############################################################################
-
-    # Profit - Value of immediate exercise:
-    profit = np.zeros(shape=(number_periods, number_simulations))
-
-    # American option value of project, given that you can either delay or exercise:
-    american_option_value = np.zeros(shape=number_simulations)
-
-    # Optimal period of exercise is the earliest time that exercise is triggered. If no exercise, an NA is returned:
-    exercise_time = np.full(shape=number_simulations, fill_value=np.nan)
 
     ## Payoff function:
     if call_option:
@@ -62,12 +53,18 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     else:
         profit_function = lambda payoff, strike_price: np.maximum(strike_price - payoff, 0)
 
+    ## Forward insight (high bias) - the immediate payoff of exercise at any time point and simulated payoff path:
+    profit = profit_function(payoff, strike_price)
+
     ##############################################################################
     ###################### Begin LSM Simulation Algorithm: #######################
     ##############################################################################
 
-    # Option maturity - the Immediate payoff of exercising:
-    profit[-1, :] = profit_function(payoff[-1, :], strike_price)
+    # American option value of project, given that you can either delay or exercise:
+    american_option_value = np.zeros(shape=number_simulations)
+
+    # Optimal period of exercise is the earliest time that exercise is triggered. If no exercise, an NA is returned:
+    exercise_time = np.full(shape=number_simulations, fill_value=np.nan)
 
     ## Would we exercise at option termination?
     exercise = profit[-1,] > 0
@@ -82,8 +79,8 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     ## Backwards induction begin:
     for t in range(termination_period - 1, -1, -1):
 
-        ## Forward insight (high bias) - the immediate payoff of exercise:
-        profit[t, :] = profit_t = profit_function(payoff[t, :], strike_price)
+        ## Immediate payoff of exercise:
+        profit_t = profit[t, :]
 
         # We only consider the exercise / delay exercise decision for price paths that are in the money (ie. profit from immediate exercise > 0):
         state_variables_t = state_variables[t, :, :]
@@ -92,7 +89,7 @@ def monte_carlo_simulation(state_variables: np.ndarray,
         # Expected value of waiting to exercise - Continuation value:
         continuation_value = american_option_value * discount_rate
 
-        # Use Least-Squares regression to introduce low bias, and compare expected value of waiting against the value of immediate exercise:
+        # Least-Squares regression (low bias) - compare expected value of waiting against the value of immediate exercise:
         if in_the_money_paths.any():
             continuation_value = estimate_continuation_value(
                 in_the_money_paths=in_the_money_paths,
