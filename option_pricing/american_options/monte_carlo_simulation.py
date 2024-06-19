@@ -2,6 +2,8 @@ import numpy as np
 from numbers import Number
 from typing import Optional, Union
 
+# __name__ = "option_pricing.american_options.monte_carlo_simulation"
+
 # Requirements:
 from .._utils.continuation_value import estimate_continuation_value
 from .._utils.discount import discount
@@ -64,7 +66,7 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     american_option_value = np.zeros(shape=number_simulations)
 
     # Optimal period of exercise is the earliest time that exercise is triggered. If no exercise, an NA is returned:
-    exercise_time = np.full(shape=number_simulations, fill_value=np.nan)
+    exercise_timings = np.full(shape=number_simulations, fill_value=np.nan)
 
     ## Would we exercise at option termination?
     exercise = profit[-1,] > 0
@@ -73,10 +75,11 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     american_option_value[exercise] = profit[-1, exercise]
 
     # Was the option exercised?
-    exercise_time[exercise] = termination_period
+    exercise_timings[exercise] = termination_period
 
     ## American Options hold value in waiting:
     ## Backwards induction begin:
+    # t = termination_period - 1
     for t in range(termination_period - 1, -1, -1):
 
         ## Immediate payoff of exercise:
@@ -108,7 +111,7 @@ def monte_carlo_simulation(state_variables: np.ndarray,
         american_option_value[exercise] = profit_t[exercise]
 
         # Was the option exercised?
-        exercise_time[exercise] = t
+        exercise_timings[exercise] = t
 
         # Re-iterate.
     # End backwards induction.
@@ -120,7 +123,7 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     return AmericanOption(
             american_option_value=american_option_value,
             number_simulations=number_simulations, 
-            exercise_time=exercise_time, 
+            exercise_timings=exercise_timings, 
             number_periods=number_periods,
             time_step=time_step,
             call_option=call_option
