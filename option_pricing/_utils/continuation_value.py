@@ -56,10 +56,10 @@ def estimate_continuation_value(
     number_state_variables = state_variables_t_in_the_money.shape[1]
     if cross_product and number_state_variables > 1:
         regression_matrix = np.concatenate([regression_matrix] + \
-                                                [ state_variables_t_in_the_money[:, i] * state_variables_t_in_the_money[:, j] \
+                                                np.column_stack([ state_variables_t_in_the_money[:, i] * state_variables_t_in_the_money[:, j] \
                                                 for i in range(number_state_variables) \
                                                 for j in range(i+1, number_state_variables)
-                                                ]
+                                                ])
                                             ,axis=1
                                             )
 
