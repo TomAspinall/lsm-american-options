@@ -20,7 +20,7 @@ def geometric_brownian_motion(
         sigma: Number,
         S0: Number,
         time_step: Number,
-        testing: bool = True
+        testing: bool = False
 ) -> np.ndarray:
 
     # Dimension 1:
