@@ -81,7 +81,7 @@ def monte_carlo_simulation(
     ##############################################################################
 
     ## Array of subsequent discounting of cash flows:
-    discount_arr = discount_array(risk_free_rate, np.array(range(number_periods)))
+    discount_arr = discount_array(nominal_interest_rate, np.array(range(number_periods)))
     
     ## Develop discount matrix:
     discount_matrix = np.eye(number_periods)
@@ -90,6 +90,7 @@ def monte_carlo_simulation(
         discount_matrix[diagonal[:-i] + i, diagonal[:-i]] = discount_arr[i]
     # Running Present Value (RPV) is the PV of all future net cash flows:
     running_present_value = (net_cash_flow.T @ discount_matrix).T
+    ## TODO: RPV at terminal simulated price = 0? Assumption of if operating in this period or not?
 
     # Further discount the Running Present Value based upon waiting for construction to complete:
     if construction_periods > 0:
@@ -162,8 +163,8 @@ def monte_carlo_simulation(
         # Re-iterate.
     # End backwards induction.
 
-    ## TODO: One more required?
-    real_option_value = real_option_value * discount_rate
+    ## TODO: One more required inconsistency between real_options and american_options?
+    # real_option_value = real_option_value * discount_rate
 
     ## Evaluate outputs:
     return RealOption(
