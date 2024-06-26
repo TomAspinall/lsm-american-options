@@ -10,7 +10,6 @@ from math import sqrt, log, ceil
 # sigma = 0.2
 # S0 = 36
 # time_step = 1/12
-# # time_step = 1/50
 # testing = True
 
 def geometric_brownian_motion(
@@ -49,7 +48,7 @@ def geometric_brownian_motion(
     
     if testing:
         for i in range(number_loops):
-            shock[i,:] = np.arange(0, number_steps / 100,  0.01)  * 0.05    
+            shock[i,:] = np.arange(0, number_steps / 100,  0.01)  
 
     shock_cumulative = np.cumsum(shock, axis=1)
 
