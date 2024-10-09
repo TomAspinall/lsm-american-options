@@ -1,30 +1,32 @@
-import numpy as np
 from numbers import Number
-from typing import Optional, Union
+from typing import Optional
+
+import numpy as np
+
+# Requirements:
+from ..utils.continuation_value import estimate_continuation_value
+from ..utils.discount import discount
+from ..utils.option_results import AmericanOption
 
 # __name__ = "option_pricing.american_options.monte_carlo_simulation"
 
-# Requirements:
-from .._utils.continuation_value import estimate_continuation_value
-from .._utils.discount import discount
-from .._utils.option_results import AmericanOption
 
 def monte_carlo_simulation(state_variables: np.ndarray,
-                        payoff: np.ndarray,
-                        strike_price: Number,
-                        time_step: Number,
-                        risk_free_rate: Number,
-                        call_option: Optional[bool] = True,
-                        orthogonal: Optional[str] = "Power",
-                        degree: Optional[int] = 2,
-                        cross_product: Optional[bool] = True,
-                        ):
+                           payoff: np.ndarray,
+                           strike_price: Number,
+                           time_step: Number,
+                           risk_free_rate: Number,
+                           call_option: Optional[bool] = True,
+                           orthogonal: Optional[str] = "Power",
+                           degree: Optional[int] = 2,
+                           cross_product: Optional[bool] = True,
+                           ):
 
-    ## State variables must be coerced as a 3-d array:
+    # State variables must be coerced as a 3-d array:
     if state_variables.ndim < 3:
         state_variables = state_variables.reshape(state_variables.shape + (1,))
 
-    ## Const:
+    # Const:
 
     # length rolumns: # simulations
     # length rows:    # discrete time periods
@@ -42,20 +44,24 @@ def monte_carlo_simulation(state_variables: np.ndarray,
 
     # Assertions:
     # assert type(K) is Number and not len(K) == number_simulations, "length of object 'K' does not equal 1 or number of columns of 'state_variables'!"
-    assert not np.isnan(state_variables).any(), "NA's cannot be specified within 'state_variables'"
-    assert number_periods == payoff.shape[0] and number_simulations == payoff.shape[1], "The first 2 dimensions of 'state_variables' must match the dimensions of 'payoff'"
+    assert not np.isnan(state_variables).any(
+    ), "NA's cannot be specified within 'state_variables'"
+    assert number_periods == payoff.shape[0] and number_simulations == payoff.shape[
+        1], "The first 2 dimensions of 'state_variables' must match the dimensions of 'payoff'"
 
     ##############################################################################
     ################### Calculate Immediate Payoff (High Bias): ##################
     ##############################################################################
 
-    ## Payoff function:
+    # Payoff function:
     if call_option:
-        profit_function = lambda payoff, strike_price: np.maximum(payoff - strike_price, 0)
+        def profit_function(payoff, strike_price): return np.maximum(
+            payoff - strike_price, 0)
     else:
-        profit_function = lambda payoff, strike_price: np.maximum(strike_price - payoff, 0)
+        def profit_function(payoff, strike_price): return np.maximum(
+            strike_price - payoff, 0)
 
-    ## Forward insight (high bias) - the immediate payoff of exercise at any time point and simulated payoff path:
+    # Forward insight (high bias) - the immediate payoff of exercise at any time point and simulated payoff path:
     profit = profit_function(payoff, strike_price)
 
     ##############################################################################
@@ -68,7 +74,7 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     # Optimal period of exercise is the earliest time that exercise is triggered. If no exercise, an NA is returned:
     exercise_timings = np.full(shape=number_simulations, fill_value=np.nan)
 
-    ## Would we exercise at option termination?
+    # Would we exercise at option termination?
     exercise = profit[-1,] > 0
 
     # Receive immediate profit if exercising:
@@ -77,12 +83,12 @@ def monte_carlo_simulation(state_variables: np.ndarray,
     # Was the option exercised?
     exercise_timings[exercise] = termination_period
 
-    ## American Options hold value in waiting:
-    ## Backwards induction begin:
+    # American Options hold value in waiting:
+    # Backwards induction begin:
     # t = termination_period - 1
     for t in range(termination_period - 1, -1, -1):
 
-        ## Immediate payoff of exercise:
+        # Immediate payoff of exercise:
         profit_t = profit[t, :]
 
         # We only consider the exercise / delay exercise decision for price paths that are in the money (ie. profit from immediate exercise > 0):
@@ -116,15 +122,15 @@ def monte_carlo_simulation(state_variables: np.ndarray,
         # Re-iterate.
     # End backwards induction.
 
-    ## TODO: One more required?
+    # TODO: One more required?
     american_option_value = american_option_value * discount_rate
 
-    ## Evaluate outputs:
+    # Evaluate outputs:
     return AmericanOption(
-            american_option_value=american_option_value,
-            number_simulations=number_simulations, 
-            exercise_timings=exercise_timings, 
-            number_periods=number_periods,
-            time_step=time_step,
-            call_option=call_option
-            )
+        american_option_value=american_option_value,
+        number_simulations=number_simulations,
+        exercise_timings=exercise_timings,
+        number_periods=number_periods,
+        time_step=time_step,
+        call_option=call_option
+    )
